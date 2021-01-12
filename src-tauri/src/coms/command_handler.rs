@@ -39,22 +39,22 @@ impl CommandHandler {
         let func: fn(content: String) -> std::string::String = match args[0].as_str() {
             "ping" => Self::ping,
             "resolve" => Self::resolve,
+            "echo" => Self::echo,
             _ => Self::default
         };
         func(data)
     }
     
-    pub fn default(content: String) -> String {
+    pub fn default(_content: String) -> String {
         String::from(r#"[{"error": "Command is not known!"}]"#)
     }
 
-    pub fn ping(content: String) -> String {
+    pub fn ping(_content: String) -> String {
         String::from("PONG")
     }
 
     /// Resolves an input string
     pub fn resolve(content: String) -> String {
-        println!("{}", content);
         match lookup_host(content.as_str()) {
             Ok(ips) => {
                 let mut string_ips: Vec<String> = Vec::new();
@@ -68,4 +68,10 @@ impl CommandHandler {
             }
         }
     }
+
+    // Echos content
+    pub fn echo(content: String) -> String {
+        String::from(format!("[{{\"message\": {}}}]", content))
+    }
+
 }
