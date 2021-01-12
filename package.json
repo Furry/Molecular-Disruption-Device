@@ -1,0 +1,8 @@
+{
+  "scripts": {
+	"tarui": "tauri"
+  },
+  "dependencies": {
+    "tauri": "^0.14.0"
+  }
+}

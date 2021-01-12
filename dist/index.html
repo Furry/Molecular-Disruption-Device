@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="main_window">
+        <p class="line">guest@naminginprogress.com $ </p>
+    </div>
+</body>
+</html>
+
+<script>
+
+    class CommandHandler {
+        constructor() {
+            // A blank object for handling commands
+            this.commands = { }
+        }
+
+        bind(name, fn) {
+            this.commands.name = fn
+        }
+    }
+
+    const instance = new CommandHandler()
+    
+    instance.bind("help", () => {
+
+    })
+
+    let prefix = "guest@naminginprogress.com $ "
+
+    function newLine(content, err) {
+        if (err) {
+
+        }
+        console.log(content)
+        document.getElementById("main_window").innerHTML += `<p class="line">guest@naminginprogress.com $ </p>`
+    }
+
+    function append() {
+        
+    }
+    document.onkeydown = (event) => {
+        const elems = document.getElementsByClassName("line")
+        const elem = elems[elems.length - 1]
+        switch (event.key) {
+            case "Backspace": {
+                if (elem.textContent.length > prefix.length) {
+                    elem.textContent = elem.textContent.slice(0, elem.textContent.length - 1)
+                }
+            }; break;
+            case "Enter": {
+                newLine(elem.textContent.slice(prefix.length))
+            }
+            default: {
+                if (event.key.length == 1) {
+                    elem.textContent = elem.textContent + event.key
+                }
+            }
+        }
+        if (event.shiftKey == false && event.charCode == 13) {
+
+        }
+    }
+</script>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Mono&display=swap');
+    * {
+        margin: 0px;
+        padding: 0px;
+    }
+
+    body {
+        background-color: #333444;
+    }
+
+    /* Terminal P >:D */
+    p {
+        font-size: 18px;
+        color: white;
+        font-family: 'Space Mono', monospace;
+    }
+
+    #active {
+        display: inline;
+    }
+    
+    #active br {
+        display: none
+    }
+
+    #main_window {
+        padding-left: 5px; padding-top: 5px;
+    }
+
+    .line {
+
+    }
+
+</style>
