@@ -7,18 +7,27 @@
 </head>
 <body>
     <div id="main" style="display: flex; height: 100vh;">
-        <!-- <div id="sidebar" style="width: 10%; background: #a9a9a9; height: 100%; min-width: 200px; text-align: center">
+        <div id="sidebar" style="width: 10%; background: #FF947C; height: 100%; min-width: 200px; text-align: center">
             <div class="nav_title rainbow-box unselectable"> <p>Entry</p> </div>
+            <!-- <hr class="style-seven"> Have to figure out how to make this look good...-->
             <ul>
                 <li>
-
+                    <!-- Generated Content Here -->
                 </li>
             </ul>
-        </div> -->
+        </div>
         <div id="term" style="flex-grow: 1; background: #2A363B; height: 100%; overflow: scroll; overflow-x: hidden;">
             <div class="content">
                 <ul id="data" style="list-style: none;">
-
+                    <li>
+                        <p>Microsoft Windows [Version 10.0.18363.1256]</p>
+                    </li>
+                    <li>
+                        <p>(c) 2019 Microsoft Corporation. All rights reserved.</p>
+                    </li>
+                    <li>
+                        <p><br>C:\Users\ender></p>
+                    </li>
                 <ul>
             </div>
         </div>
@@ -29,104 +38,38 @@
 <!-- Handle key events -->
 <script>
 
-    const prefix = "MDD $ "
-    createLine(prefix)
-
     const wsc = new WebSocket("ws://localhost:8080/ws/")
     const cache = []
-    const commands = {
-        index: 0,
-        cache: []
-    }
-    let pending = false
 
     wsc.addEventListener("message", (event) => {
-        cache.push(event.data)
+        if (cache.length > 0) {
+            cache[0].resolve(event)
+            delete cache[0]
+        } else {
+            console.log("RECIEVED CONTROL")
+        }
     })
 
     async function send(command) {
-        switch (command) {
-            case "clr": {
-                document.getElementById("data").innerHTML = ""
-                createLine(prefix)
-            }; break;
-            case "": {
-                createLine(prefix)
-            }; break;
-            default: {
-                pending = true
-                wsc.send(command)
-                const result = new Promise((resolve, reject) => {
-                    const looper = setInterval(() => {
-                        if (cache[0]) {
-                            clearInterval(looper)
-                            const content = cache[0]
-                            cache.shift()
-                            pending = false
-                            resolve(content)
-                        }
-                    }, 1)
-                })
-                return result
-            }; break;
-        }
+        const result = new Promise()
+        cache.push(result)
+        wsc.send(command)
+        return result
     }
 
-    function createLine(content, color = "#E84A5F") {
+    function createLine(content, color = "") {
         const data = document.getElementById("data")
-        console.log(content)
-        data.innerHTML += `<li><p style="color: ${color}">${content.replace(/\|nl\|/g, "<br>")}</p></li>`
+        data.innerHTML += `<li><p>${content.replace(/\\r/g, "<br>")}</p></li>`
     }
 
-    function createMessage(content, color = "") {
-        createLine(content)
-        createLine(prefix)
-    }
-
-    /*
-    I present to you, the golden child of this shit show code base.
-    */
-    function handleEvent(data) {
-        const payload = JSON.parse(data) // Should always be an array
-        console.log(data)
-        for (let instruction of payload) {
-            let key = Object.keys(instruction)[0]
-            let value = instruction[key]
-
-            switch (key) {
-                case "error": {
-                    createMessage(`Error: ${value}`)
-                }; break;
-                case "message": {
-                    createMessage(value)
-                }; break;
-                case "message_json": {
-                    if (Array.isArray(value)) {
-                        for (let elem of value) {
-                            createLine(elem)
-                        }
-                        createLine(prefix)
-                    }
-                }; break;
-                case "OK": {
-                    // A null response, if the server 
-                }; break;
-            }
-        }
-    }
+    const prefix = "MDD $ "
+    createLine(prefix)
 
     document.onkeydown = async (event) => {
-        // Don't take key input if we're waiting for a result from a command
-        if (pending == true) return
+        console.log(event.key)
         const lineList = document.getElementById("data").children
         const elem = lineList.item(lineList.length - 1).children.item(0)
         switch (event.key) {
-            case "ArrowUp": {
-                if (commands.cache.length > commands.index) {
-                    elem.textContent = prefix + commands.cache[commands.index]
-                    commands.index += 1
-                }
-            }
             case "Backspace": {
                 if (elem.textContent.length > prefix.length) {
                     elem.textContent = elem.textContent.slice(0, elem.textContent.length - 1)
@@ -134,12 +77,9 @@
             }; break;
             case "Enter": {
                 const data = elem.textContent.slice(prefix.length)
-                commands.cache.unshift(data)
-                commands.index = 0
                 const resp = await send(data)
-                handleEvent(resp)
-                const content = document.getElementsByClassName("content").item(0)
-                console.log(content.cont)
+                createLine(data)
+                createLine(prefix)
             }
             default: {
                 if (event.key.length == 1) {
@@ -164,6 +104,7 @@
         margin-top: 0px;
         font-size: 18px;
         font-family: 'Space Mono', monospace;
+        color: #E84A5F;
     }
 
     #sidebar {

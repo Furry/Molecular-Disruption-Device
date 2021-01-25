@@ -5,6 +5,7 @@
 
 mod cmd;
 mod coms;
+mod traffic;
 
 use std::thread;
 

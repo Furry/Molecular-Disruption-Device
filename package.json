@@ -1,8 +1,9 @@
 {
   "scripts": {
-	"tarui": "tauri"
+    "tarui": "tauri"
   },
   "dependencies": {
+    "express": "^4.17.1",
     "tauri": "^0.14.0"
   }
 }
